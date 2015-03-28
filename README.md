@@ -15,3 +15,5 @@ or add
 "filsh/yii2-mpjax": "*"
 
 to the require section of your composer.json
+
+# Usage
