@@ -27,7 +27,7 @@ class MpjaxBlock extends Widget
             $this->options['id'] = $this->getId();
         }
         
-        if($this->getView()->requiresPjax($this->options['id'])) {
+        if($this->getView()->requiresPjaxContainer($this->options['id'])) {
             ob_start();
             ob_implicit_flush(false);
         } else {
@@ -40,7 +40,7 @@ class MpjaxBlock extends Widget
      */
     public function run()
     {
-        if($this->getView()->requiresPjax($this->options['id'])) {
+        if($this->getView()->requiresPjaxContainer($this->options['id'])) {
             $content = ob_get_clean();
             $this->getView()->mpjaxBlocks[$this->options['id']] = $content;
         } else {

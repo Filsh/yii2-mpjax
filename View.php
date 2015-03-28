@@ -14,17 +14,19 @@ class View extends \yii\web\View
     
     public $mpjaxBlocks = [];
     
-    protected $_containers;
+    protected $_containers = [];
     
     public function init()
     {
         parent::init();
         
-        $headers = Yii::$app->getRequest()->getHeaders();
-        foreach($headers as $hame => $value) {
-            if(strpos($hame, strtolower($this->pjaxContainerHeader)) === 0) {
-                $index = substr($hame, strlen($this->pjaxContainerHeader) + 1);
-                $this->_containers[$index] = reset($value);
+        if($this->requiresPjax()) {
+            $headers = Yii::$app->getRequest()->getHeaders();
+            foreach($headers as $hame => $value) {
+                if(strpos($hame, strtolower($this->pjaxContainerHeader)) === 0) {
+                    $index = substr($hame, strlen($this->pjaxContainerHeader) + 1);
+                    $this->_containers[$index] = reset($value);
+                }
             }
         }
     }
@@ -44,21 +46,20 @@ class View extends \yii\web\View
         MpjaxBlock::end();
     }
     
-    /**
-     * @return boolean whether the current request requires pjax response from this widget
-     */
-    public function requiresPjax($id)
+    public function requiresPjax()
     {
         $headers = Yii::$app->getRequest()->getHeaders();
-        if(!$headers->get(strtolower($this->pjaxHeader))) {
-            return false;
-        }
+        return $headers->get(strtolower($this->pjaxHeader));
+    }
+    
+    public function requiresPjaxContainer($id)
+    {
         return in_array($id, $this->_containers);
     }
     
     public function afterRender($viewFile, $params, &$output)
     {
-        if(!empty($this->mpjaxBlocks)) {
+        if($this->requiresPjax()) {
             $response = Yii::$app->getResponse();
             $response->clearOutputBuffers();
             $response->setStatusCode(200);
