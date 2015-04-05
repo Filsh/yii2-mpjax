@@ -4,6 +4,7 @@ namespace filsh\yii2\mpjax;
 
 use Yii;
 use yii\web\Response;
+use yii\helpers\Html;
 use filsh\yii2\mpjax\MpjaxBlock;
 
 class View extends \yii\web\View
@@ -60,11 +61,17 @@ class View extends \yii\web\View
     public function afterRender($viewFile, $params, &$output)
     {
         if($this->requiresPjax()) {
+            $this->endBody();
+            $this->endPage(true);
+            
             $response = Yii::$app->getResponse();
             $response->clearOutputBuffers();
             $response->setStatusCode(200);
             $response->format = Response::FORMAT_JSON;
-            $response->data = $this->mpjaxBlocks;
+            $response->data = [
+                'title' => Html::encode($this->title),
+                'blocks' => $this->mpjaxBlocks
+            ];
             $response->send();
             
             Yii::$app->end();

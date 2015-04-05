@@ -30,6 +30,11 @@ class MpjaxBlock extends Widget
         if($this->getView()->requiresPjaxContainer($this->options['id'])) {
             ob_start();
             ob_implicit_flush(false);
+            $view = $this->getView();
+            $view->clear();
+            $view->beginPage();
+            $view->head();
+            $view->beginBody();
         } else {
             echo Html::beginTag('div', $this->options);
         }
@@ -41,6 +46,15 @@ class MpjaxBlock extends Widget
     public function run()
     {
         if($this->getView()->requiresPjaxContainer($this->options['id'])) {
+            $this->getView()->endBody();
+
+            // Do not re-send css files as it may override the css files that were loaded after them.
+            // This is a temporary fix for https://github.com/yiisoft/yii2/issues/2310
+            // It should be removed once pjax supports loading only missing css files
+            $this->getView()->cssFiles = null;
+
+            $this->getView()->endPage(true);
+
             $content = ob_get_clean();
             $this->getView()->mpjaxBlocks[$this->options['id']] = $content;
         } else {
