@@ -47,11 +47,9 @@ class MpjaxBlock extends Widget
     {
         if($this->getView()->requiresPjaxContainer($this->options['id'])) {
             $this->getView()->endBody();
-
-            // Do not re-send css files as it may override the css files that were loaded after them.
-            // This is a temporary fix for https://github.com/yiisoft/yii2/issues/2310
-            // It should be removed once pjax supports loading only missing css files
+            
             $this->getView()->cssFiles = null;
+            $this->getView()->jsFiles = null;
 
             $this->getView()->endPage(true);
 
