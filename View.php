@@ -61,19 +61,14 @@ class View extends \yii\web\View
     public function afterRender($viewFile, $params, &$output)
     {
         if($this->requiresPjax()) {
-            $this->endBody();
-            $this->endPage(true);
-            
             $response = Yii::$app->getResponse();
             $response->clearOutputBuffers();
-            $response->setStatusCode(200);
             $response->format = Response::FORMAT_JSON;
             $response->data = [
                 'title' => Html::encode($this->title),
                 'blocks' => $this->mpjaxBlocks
             ];
             $response->send();
-            
             Yii::$app->end();
         } else {
             parent::afterRender($viewFile, $params, $output);

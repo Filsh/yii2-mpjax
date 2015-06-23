@@ -27,10 +27,10 @@ class MpjaxBlock extends Widget
             $this->options['id'] = $this->getId();
         }
         
-        if($this->getView()->requiresPjaxContainer($this->options['id'])) {
+        $view = $this->getView();
+        if($view->requiresPjaxContainer($this->options['id'])) {
             ob_start();
             ob_implicit_flush(false);
-            $view = $this->getView();
             $view->clear();
             $view->beginPage();
             $view->head();
@@ -45,16 +45,15 @@ class MpjaxBlock extends Widget
      */
     public function run()
     {
-        if($this->getView()->requiresPjaxContainer($this->options['id'])) {
-            $this->getView()->endBody();
-            
-            $this->getView()->cssFiles = null;
-            $this->getView()->jsFiles = null;
-
-            $this->getView()->endPage(true);
+        $view = $this->getView();
+        if($view->requiresPjaxContainer($this->options['id'])) {
+            $view->endBody();
+            $view->cssFiles = null;
+            $view->jsFiles = null;
+            $view->endPage(true);
 
             $content = ob_get_clean();
-            $this->getView()->mpjaxBlocks[$this->options['id']] = $content;
+            $view->mpjaxBlocks[$this->options['id']] = $content;
         } else {
             echo Html::endTag('div');
         }
