@@ -21,9 +21,9 @@ class View extends \yii\web\View
     {
         parent::init();
         
-        if($this->requiresPjax()) {
-            $headers = Yii::$app->getRequest()->getHeaders();
-            foreach($headers as $hame => $value) {
+        $request = Yii::$app->getRequest();
+        if($request->getIsPjax()) {
+            foreach($request->getHeaders() as $hame => $value) {
                 if(strpos($hame, strtolower($this->pjaxContainerHeader)) === 0) {
                     $index = substr($hame, strlen($this->pjaxContainerHeader) + 1);
                     $this->_containers[$index] = reset($value);
@@ -47,12 +47,6 @@ class View extends \yii\web\View
         MpjaxBlock::end();
     }
     
-    public function requiresPjax()
-    {
-        $headers = Yii::$app->getRequest()->getHeaders();
-        return $headers->get(strtolower($this->pjaxHeader));
-    }
-    
     public function requiresPjaxContainer($id)
     {
         return in_array($id, $this->_containers);
@@ -60,7 +54,8 @@ class View extends \yii\web\View
     
     public function afterRender($viewFile, $params, &$output)
     {
-        if($this->requiresPjax()) {
+        $request = Yii::$app->getRequest();
+        if($request->getIsPjax()) {
             $response = Yii::$app->getResponse();
             $response->clearOutputBuffers();
             $response->format = Response::FORMAT_JSON;
