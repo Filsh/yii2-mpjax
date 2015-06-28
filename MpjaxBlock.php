@@ -5,6 +5,7 @@ namespace filsh\yii2\mpjax;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
+use yii\web\Response;
 use filsh\yii2\mpjax\View;
 
 class MpjaxBlock extends Widget
@@ -14,6 +15,8 @@ class MpjaxBlock extends Widget
      * @see \yii\helpers\Html::renderTagAttributes() for details on how attributes are being rendered.
      */
     public $options = [];
+    
+    protected static $blocks = [];
     
     /**
      * @inheritdoc
@@ -28,7 +31,7 @@ class MpjaxBlock extends Widget
         }
         
         $view = $this->getView();
-        if($view->requiresPjaxContainer($this->options['id'])) {
+        if($this->requiresPjaxContainer($this->options['id'])) {
             ob_start();
             ob_implicit_flush(false);
             $view->clear();
@@ -46,16 +49,37 @@ class MpjaxBlock extends Widget
     public function run()
     {
         $view = $this->getView();
-        if($view->requiresPjaxContainer($this->options['id'])) {
+        if($this->requiresPjaxContainer($this->options['id'])) {
             $view->endBody();
             $view->cssFiles = null;
             $view->jsFiles = null;
             $view->endPage(true);
 
             $content = ob_get_clean();
-            $view->mpjaxBlocks[$this->options['id']] = $content;
+            self::$blocks[$this->options['id']] = $content;
+            
+            $containers = Yii::$app->getRequest()->getPjaxContainers();
+            if(count(self::$blocks) === count($containers)) {
+                $response = Yii::$app->getResponse();
+                $response->clearOutputBuffers();
+                $response->format = Response::FORMAT_JSON;
+                $response->data = [
+                    'title' => Html::encode($view->title),
+                    'blocks' => self::$blocks
+                ];
+                $response->send();
+                Yii::$app->end();
+            }
         } else {
             echo Html::endTag('div');
         }
+    }
+    
+    public function requiresPjaxContainer($id)
+    {
+        if(($request = Yii::$app->getRequest()) && $request instanceof Request) {
+            return $request->getIsPjax() && in_array($id, $request->getPjaxContainers());
+        }
+        return false;
     }
 }
