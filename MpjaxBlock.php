@@ -6,7 +6,6 @@ use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
 use yii\web\Response;
-use filsh\yii2\mpjax\View;
 
 class MpjaxBlock extends Widget
 {
@@ -23,17 +22,15 @@ class MpjaxBlock extends Widget
      */
     public function init()
     {
-        if(!($this->getView() instanceof View)) {
-            throw new \yii\base\InvalidConfigException('View must be instance of ' . View::className() . '.');
-        }
         if(!isset($this->options['id'])) {
             $this->options['id'] = $this->getId();
         }
         
-        $view = $this->getView();
         if($this->requiresPjaxContainer($this->options['id'])) {
             ob_start();
             ob_implicit_flush(false);
+            
+            $view = $this->getView();
             $view->clear();
             $view->beginPage();
             $view->head();
@@ -48,8 +45,8 @@ class MpjaxBlock extends Widget
      */
     public function run()
     {
-        $view = $this->getView();
         if($this->requiresPjaxContainer($this->options['id'])) {
+            $view = $this->getView();
             $view->endBody();
             $view->cssFiles = null;
             $view->jsFiles = null;
