@@ -15,6 +15,8 @@ class MpjaxBlock extends Widget
      */
     public $options = [];
     
+    public $content;
+    
     protected static $blocks = [];
     
     /**
@@ -45,6 +47,8 @@ class MpjaxBlock extends Widget
      */
     public function run()
     {
+        echo $this->content;
+        
         if($this->requiresPjaxContainer($this->options['id'])) {
             $view = $this->getView();
             $view->endBody();
@@ -52,8 +56,7 @@ class MpjaxBlock extends Widget
             $view->jsFiles = null;
             $view->endPage(true);
 
-            $content = ob_get_clean();
-            self::$blocks[$this->options['id']] = $content;
+            self::$blocks[$this->options['id']] = ob_get_clean();
             
             $containers = Yii::$app->getRequest()->getPjaxContainers();
             if(count(self::$blocks) === count($containers)) {
